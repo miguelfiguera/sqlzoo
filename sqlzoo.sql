@@ -1,0 +1,3 @@
+-- This is an only page for every exercise. I had some troubles understanding the joins part.
+-- But I did enjoy SQL, as a former social media manager / RRSS content writer... The manipulation of data is beautiful to
+-- make a choice, I wish I had this before.
