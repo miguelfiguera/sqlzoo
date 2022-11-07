@@ -170,5 +170,203 @@ WHERE population > ALL(
   SELECT population * 3
   FROM world y
   WHERE x.continent = y.continent
-  AND x.name <> y.name);
+  AND x.name != y.name);
 
+  --sum & count
+
+  SELECT SUM(population)
+FROM world
+
+SELECT DISTINCT continent
+FROM world
+
+SELECT SUM(gdp) 
+FROM world
+WHERE continent = 'Africa';
+
+SELECT COUNT(area)
+FROM world
+WHERE area >=1000000;
+
+SELECT SUM(population)
+FROM world
+WHERE name IN('Estonia', 'Latvia', 'Lithuania');
+
+SELECT continent, COUNT(name)
+  FROM world
+ GROUP BY continent
+
+ SELECT continent, COUNT(name)
+FROM world
+WHERE population >=10000000
+GROUP BY continent;
+
+SELECT continent
+FROM world
+GROUP BY continent
+HAVING SUM(population) >=100000000
+
+--JOIN OPERATION
+
+SELECT matchid,player FROM goal 
+  WHERE teamid= 'GER';
+
+  SELECT DISTINCT id,stadium,team1,team2
+ FROM game JOIN goal ON (id=matchid)
+WHERE matchid=1012;
+
+SELECT player,teamid,stadium,mdate
+FROM game JOIN goal ON (game.id=goal.matchid)
+WHERE goal.teamid='GER';
+
+SELECT team1,team2,player
+FROM goal JOIN game ON(goal.matchid=game.id)
+WHERE player LIKE 'Mario%';
+
+SELECT player, teamid, coach, gtime
+  FROM goal JOIN eteam on teamid=id
+ WHERE gtime<=10
+
+ SELECT mdate, teamname
+FROM game JOIN eteam ON (game.team1=eteam.id)
+WHERE coach='Fernando Santos' AND eteam.id=game.team1;
+
+SELECT player
+FROM goal JOIN game ON (goal.matchid=game.id)
+WHERE stadium = 'National Stadium, Warsaw';
+
+SELECT DISTINCT player
+  FROM game JOIN goal ON matchid = id 
+    WHERE (team1='GER' AND teamid!='GER') OR (team2='GER' AND teamid!='GER');
+
+    SELECT  teamname,COUNT(*)
+  FROM eteam JOIN goal ON id=teamid
+GROUP BY teamname;
+ 
+
+ SELECT  stadium,COUNT(*)
+  FROM game JOIN goal ON game.id=goal.matchid
+GROUP BY stadium;
+ 
+
+ SELECT matchid,mdate,COUNT(*)
+  FROM game JOIN goal ON matchid = id 
+ WHERE (team1 = 'POL' OR team2 = 'POL')
+GROUP BY matchid,mdate;
+
+
+SELECT matchid,mdate,count(*)
+FROM game JOIN goal ON game.id=goal.matchid
+WHERE goal.teamid='ger'
+GROUP BY matchid,mdate;
+
+SELECT mdate, team1, SUM(CASE WHEN teamid = team1 THEN 1 ELSE 0 END) AS score1,
+              team2, SUM(CASE WHEN teamid = team2 THEN 1 ELSE 0 END) AS score2
+  FROM game
+LEFT JOIN goal ON id = matchid
+GROUP BY mdate, matchid, team1, team2
+ORDER BY mdate, matchid, team1, team2;
+
+-- MORE JOIN OPERATIONS --
+
+SELECT id, title
+ FROM movie
+ WHERE yr=1962
+
+ SELECT yr
+from movie
+where title = 'Citizen Kane';
+
+SELECT id, title, yr
+FROM movie
+WHERE title LIKE '%Star Trek%'
+ORDER BY yr;
+
+SELECT id
+FROM actor
+WHERE name = 'Glenn Close';
+
+SELECT id
+FROM movie
+WHERE title = 'Casablanca';
+
+SELECT name
+FROM    movie JOIN casting ON movie.id=movieid
+         JOIN actor   ON actorid=actor.id
+WHERE movie.title='Casablanca'
+ORDER BY actor.name;
+
+SELECT name
+FROM    movie JOIN casting ON movie.id=movieid
+         JOIN actor   ON actorid=actor.id
+WHERE movie.title='Alien'
+ORDER BY actor.name;
+
+SELECT title
+FROM    movie JOIN casting ON movie.id=movieid
+         JOIN actor   ON actorid=actor.id
+WHERE actor.name='Harrison Ford';
+
+SELECT title
+FROM    movie JOIN casting ON movie.id=movieid
+         JOIN actor   ON actorid=actor.id
+WHERE actor.name='Harrison Ford' AND casting.ord != 1;
+
+SELECT title,name
+FROM    movie JOIN casting ON movie.id=movieid
+         JOIN actor   ON actorid=actor.id
+WHERE movie.yr='1962' AND casting.ord = 1;
+
+SELECT yr,COUNT(title) FROM
+  movie JOIN casting ON movie.id=movieid
+        JOIN actor   ON actorid=actor.id
+WHERE name='Rock Hudson'
+GROUP BY yr
+HAVING COUNT(title) > 1
+
+SELECT movie.title, actor.name
+FROM movie JOIN casting ON movie.id = casting.movieid
+           JOIN actor ON casting.actorid = actor.id
+WHERE movie.id IN (
+                    SELECT movieid
+                    FROM casting
+                    WHERE actorid = (
+                                      SELECT id
+                                      FROM actor
+                                      WHERE name = 'Julie Andrews'
+                                    )
+)
+AND casting.ord = 1;
+
+SELECT actor.name FROM
+  movie JOIN casting ON movie.id=movieid
+        JOIN actor   ON actorid=actor.id
+WHERE ord=1
+GROUP BY actor.name
+HAVING COUNT(*) >= 15
+ORDER BY name;
+
+
+SELECT title, COUNT(actorid) as NA FROM
+  movie JOIN casting ON movie.id=movieid
+        JOIN actor   ON actorid=actor.id
+WHERE yr = '1978'
+GROUP BY title
+ORDER BY NA DESC,title
+
+SELECT actor.name
+FROM actor
+JOIN casting ON actor.id = casting.actorid
+WHERE casting.movieid IN (
+                            SELECT casting.movieid
+                            FROM casting
+                            JOIN movie ON casting.movieid = movie.id
+                            WHERE casting.actorid = (
+                                                      SELECT actor.id
+                                                      FROM actor
+                                                      WHERE name = 'Art Garfunkel'
+                                                    )
+                          )
+AND actor.name <> 'Art Garfunkel';
+
+-- 
