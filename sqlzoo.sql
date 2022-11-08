@@ -369,4 +369,167 @@ WHERE casting.movieid IN (
                           )
 AND actor.name <> 'Art Garfunkel';
 
--- 
+--  NULL INNER JOIN RIGHT JOIN LEFT JOIN --
+
+SELECT name FROM teacher WHERE dept is NULL;
+
+SELECT teacher.name, dept.name
+ FROM teacher INNER JOIN dept
+           ON (teacher.dept=dept.id)
+
+SELECT teacher.name, dept.name FROM teacher LEFT JOIN dept ON (dept.id=teacher.dept)
+
+SELECT teacher.name, dept.name FROM teacher RIGHT JOIN dept ON (dept.id=teacher.dept)
+
+SELECT name,COALESCE(mobile,'07986 444 2266') FROM teacher
+
+SELECT teacher.name,COALESCE(dept.name,'none')
+FROM teacher LEFT JOIN dept ON (teacher.dept = dept.id);
+
+SELECT COUNT(teacher.name) as nteacher, COUNT(teacher.mobile) as nphones FROM teacher
+
+SELECT dept.name,count(teacher.dept) FROM teacher
+RIGHT JOIN dept ON (teacher.dept = dept.id)
+GROUP BY dept.name;
+
+
+  SELECT name, CASE
+WHEN dept IN ('1','2') THEN 'Sci'
+ELSE 'Art'
+END
+ FROM teacher;
+
+
+SELECT name, CASE
+WHEN dept IN ('1','2') THEN 'Sci'
+WHEN dept IN ('3') THEN 'Art'
+ELSE 'none'
+END
+ FROM teacher;
+
+
+--NSS TUTORIAL--
+
+SELECT (A_STRONGLY_AGREE/(A_STRONGLY_AGREE + A_AGREE + A_NEUTRAL + A_DISAGREE + A_STRONGLY_DISAGREE)) * 100
+FROM nss
+WHERE question='Q01'
+AND institution='Edinburgh Napier University'
+AND subject='(8) Computer Science';
+
+
+SELECT institution,subject
+  FROM nss
+ WHERE score >= '100' 
+AND question = 'Q15'
+
+SELECT institution,score
+  FROM nss
+ WHERE question='Q15'
+   AND subject='(8) Computer Science'
+AND SCORE < '50';
+
+
+SELECT subject, SUM(response)
+FROM nss
+WHERE question='Q22'
+AND (subject='(8) Computer Science'
+OR subject='(H) Creative Arts and Design')
+GROUP BY subject;
+
+SELECT subject, SUM(A_STRONGLY_AGREE*response/100)
+FROM nss
+WHERE question='Q22'
+AND (subject='(8) Computer Science'
+OR subject='(H) Creative Arts and Design')
+GROUP BY subject;
+
+SELECT subject,ROUND(SUM((response*A_STRONGLY_AGREE)/100) / SUM(response) * 100, 0)
+FROM nss
+WHERE question='Q22'
+AND (subject='(8) Computer Science'
+OR subject='(H) Creative Arts and Design')
+GROUP BY subject;
+
+SELECT institution,ROUND(SUM((response*score)/100) / SUM(response) * 100, 0)
+FROM nss
+WHERE question='Q22'
+AND (institution LIKE '%Manchester%')
+GROUP BY institution;
+
+SELECT institution,SUM(sample),(SELECT sample FROM nss AS y
+                                WHERE subject = '(8) Computer Science'
+                                AND x.institution = y.institution
+                                AND question='Q01'
+                               )
+FROM nss AS x
+WHERE question='Q01'
+AND (institution LIKE '%Manchester%')
+GROUP BY institution;
+
+
+
+-- SELF JOIN = Unir con una copia de la misma tabla para contrastar la informacion presente.
+SELECT COUNT(*) FROM stops
+
+SELECT id FROM stops
+WHERE name = 'Craiglockhart'
+
+SELECT stops.id, stops.name
+FROM stops
+JOIN route ON stops.id = route.stop
+WHERE company = 'LRT'
+AND num = 4
+ORDER BY pos;
+
+SELECT company, num, COUNT(*)
+FROM route WHERE stop=149 OR stop=53
+GROUP BY company, num
+HAVING COUNT(*)=2;
+
+SELECT a.company, a.num, a.stop, b.stop
+FROM route a JOIN route b ON (a.company=b.company AND a.num=b.num)
+WHERE a.stop='53'
+AND b.stop = '149';
+
+SELECT a.company, a.num, stopa.name, stopb.name
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='Craiglockhart' AND stopb.name='London Road';
+
+SELECT a.company, a.num, stopa.name, stopb.name
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='Craiglockhart' AND stopb.name='London Road';
+
+SELECT DISTINCT a.company, a.num, stopa.name, stopb.name
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='Haymarket' AND stopb.name='Leith';
+
+
+SELECT DISTINCT a.company, a.num, stopa.name, stopb.name
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='Craiglockhart' AND stopb.name='Tollcross';
+
+--window functions--
+
+SELECT lastName, party, votes
+  FROM ge
+ WHERE constituency = 'S14000024' AND yr = 2017
+ORDER BY votes DESC
+
+SELECT party, votes, RANK() OVER (ORDER BY votes DESC) as posn
+FROM ge
+WHERE constituency = 'S14000024' AND yr = 2017
+ORDER BY party;
+
+
