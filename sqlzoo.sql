@@ -520,6 +520,39 @@ FROM route a JOIN route b ON
   JOIN stops stopb ON (b.stop=stopb.id)
 WHERE stopa.name='Craiglockhart' AND stopb.name='Tollcross';
 
+
+-- covid table --
+SELECT name, DAY(whn),
+ confirmed, deaths, recovered
+ FROM covid
+WHERE name = 'spain'
+AND MONTH(whn) = 3 AND YEAR(whn) = 2020
+ORDER BY whn
+
+SELECT name, DAY(whn), confirmed,
+   LAG(confirmed, 1) OVER (PARTITION BY name ORDER BY whn)
+ FROM covid
+WHERE name = 'Italy'
+AND MONTH(whn) = 3 AND YEAR(whn) = 2020
+ORDER BY whn
+
+
+SELECT name, DAY(whn), confirmed-
+   LAG(confirmed, 1) OVER (PARTITION BY name ORDER BY whn)
+ FROM covid
+WHERE name = 'Italy'
+AND MONTH(whn) = 3 AND YEAR(whn) = 2020
+ORDER BY whn
+
+
+SELECT tw.name, DATE_FORMAT(tw.whn,'%Y-%m-%d'), tw.confirmed - lw.confirmed
+FROM covid tw
+LEFT JOIN covid lw ON DATE_ADD(lw.whn, INTERVAL 1 WEEK) = tw.whn AND tw.name=lw.name
+WHERE tw.name = 'Italy'
+AND WEEKDAY(tw.whn) = 0
+ORDER BY tw.whn;
+
+
 --window functions--
 
 SELECT lastName, party, votes
